@@ -15,8 +15,9 @@ class FileHandler:
             'path': '/home/source'
             'dirs': ['dir1', 'dir2', 'dir3'],
             'files': ['file1', 'file2', 'file3'],
-            'dir1': ['/home/source/dir1/f1.py', '/home/source/dir1/a/f2.py'],
-            'dir2': ['/home/source/dir3/f1.py', '/home/source/dir3/f2.py', '/home/source/dir3/aa/bb/cc/dd.py']
+            'dir1': ['dir1/f1.py', 'dir1/a/f2.py'],
+            'dir2': ['dir2/f1.py', 'dir2/f2.py', 'dir2/aa/bb/cc/dd.py'],
+            'dir3': []
         }
         """
         result = {
@@ -24,24 +25,43 @@ class FileHandler:
             'dirs': [],
             'files': []
         }
-        for dirname, dirs, files in walk(self.path):
-            for d in dirs:
-                if not d.startswith('.'):
-                    result['dirs'].append(d)
-            for f in files:
-                if not d.startswith('.') and d.endswith('.py'):
-                    result['files'].append(f)
-            break
+        dirs = []
+        files = []
+        for filename in os.listdir(self.path):
+            # ignore .git .ssh .svn, etc
+            if not filename.startswith('.'):
+                full_path = os.path.join(self.path, filename)
+                if os.path.isdir(full_path):
+                    dirs.append(filename)
+                else:
+                    # ignore .pyc
+                    if filename.endswith('.py'):
+                        files.append(filename)
+        result['dirs'] = sorted(dirs)
+        result['files'] = sorted(files)
 
-        for t_dir in result['dirs']:
-            result[t_dir] = []
-            sub_path = path.join(self.path, t_dir)
-            for dirname, dirs, files in walk(sub_path):
-                for t_file in files:
-                    if not t_file.startswith('.') and t_file.endswith('.py'):
-                        location = path.join(t_dir, t_file)
-                        result[t_dir].append(normpath(location))
+        for dirname in result['dirs']:
+            full_path = os.path.join(self.path, dirname)
+            result[dirname] = self._dfs(full_path)
+
         return result
+
+    def _dfs(self, filename):
+        stack = []
+        ret = []
+        stack.append(filename)
+        while len(stack) > 0:
+            tmp = stack.pop()
+            if os.path.isdir(tmp):
+                for item in os.listdir(tmp):
+                    # ignore .git .xxoo
+                    if not item.startswith('.'):
+                        stack.append(os.path.join(tmp, item))
+            else:
+                if not tmp.startswith('.') and tmp.endswith('.py'):
+                    # ignore .gitignore, *.pyc
+                    ret.append(tmp.replace(self.path, ''))
+        return ret
 
     def get_source(self, filename):
         """
@@ -56,7 +76,11 @@ class FileHandler:
         result = {
             'filename': filename
         }
-        location = path.join(self.path, filename)
+        location = self.path + '\\' + filename
         with open(location, 'r') as reader:
             result['text'] = reader.read()
         return result
+
+if __name__ == '__main__':
+    f = FileHandler()
+    print f.list_all_files()
