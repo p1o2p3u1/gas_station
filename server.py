@@ -21,11 +21,15 @@ def jsonp(func):
 def hello():
     return "hello world"
 
-@app.route('/file/<filename>')
+@app.route('/file')
 @jsonp
-def get_source(filename):
-    f = FileHandler()
-    return jsonify(f.get_source(filename))
+def get_source():
+    filename = request.args.get('path', False)
+    if filename:
+        f = FileHandler()
+        return jsonify(f.get_source(filename))
+    else:
+        return "need parameter path"
 
 @app.route('/list')
 @jsonp

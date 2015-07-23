@@ -63,7 +63,7 @@ class FileHandler:
             else:
                 if not tmp.startswith('.') and tmp.endswith('.py'):
                     # ignore .gitignore, *.pyc
-                    ret.append(tmp.replace(self.path, '').lower())
+                    ret.append(tmp.replace(self.path, ''))
         return ret
 
     def get_source(self, filename):
