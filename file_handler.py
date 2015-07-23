@@ -5,7 +5,7 @@ from os.path import normpath
 class FileHandler:
 
     def __init__(self):
-        self.path = "E:/projects/gitlab/biubiu"
+        self.path = "C:/users/ting.wu/PyCharmProjects/test2".lower().replace('\\', '/')
 
     def list_all_files(self):
         """
@@ -36,7 +36,7 @@ class FileHandler:
                 else:
                     # ignore .pyc
                     if filename.endswith('.py'):
-                        files.append(filename)
+                        files.append("/" + filename)
         result['dirs'] = sorted(dirs)
         result['files'] = sorted(files)
 
@@ -56,11 +56,14 @@ class FileHandler:
                 for item in os.listdir(tmp):
                     # ignore .git .xxoo
                     if not item.startswith('.'):
-                        stack.append(os.path.join(tmp, item))
+                        # why not use path.join? because in windows we usually have a\\b and
+                        # in linux we usually have a/b, however, the path is the id of some
+                        # html element, which may cause conflicts
+                        stack.append(tmp + '/' + item)
             else:
                 if not tmp.startswith('.') and tmp.endswith('.py'):
                     # ignore .gitignore, *.pyc
-                    ret.append(tmp.replace(self.path, ''))
+                    ret.append(tmp.replace(self.path, '').lower())
         return ret
 
     def get_source(self, filename):
@@ -76,7 +79,7 @@ class FileHandler:
         result = {
             'filename': filename
         }
-        location = self.path + '\\' + filename
+        location = self.path + '/' + filename
         with open(location, 'r') as reader:
             result['text'] = reader.read()
         return result
