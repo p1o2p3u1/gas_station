@@ -1,11 +1,11 @@
 import os
-from os import walk, path
-from os.path import normpath
+from config_handler import ConfigHandler
 
 class FileHandler:
 
     def __init__(self):
-        self.path = "C:/users/ting.wu/PyCharmProjects/test2".lower().replace('\\', '/')
+        self.config = ConfigHandler()
+        self.path = self.config.path
 
     def list_all_files(self):
         """
@@ -41,7 +41,7 @@ class FileHandler:
         result['files'] = sorted(files)
 
         for dirname in result['dirs']:
-            full_path = os.path.join(self.path, dirname)
+            full_path = self.path + '/' + dirname
             result[dirname] = self._dfs(full_path)
 
         return result

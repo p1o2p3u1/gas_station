@@ -33,7 +33,5 @@ def list_dir():
     f = FileHandler()
     return jsonify(f.list_all_files())
 
-
-
 if __name__ == '__main__':
     app.run(debug=True)
