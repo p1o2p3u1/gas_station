@@ -19,7 +19,7 @@ def jsonp(func):
 
 @app.route('/')
 def hello():
-    return "hello world"
+    return "Hello World"
 
 @app.route('/file')
 @jsonp

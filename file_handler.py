@@ -1,5 +1,6 @@
 import os
 from config_handler import ConfigHandler
+from coverage.parser import CodeParser
 
 class FileHandler:
 
@@ -36,7 +37,9 @@ class FileHandler:
                 else:
                     # ignore .pyc
                     if filename.endswith('.py'):
-                        files.append("/" + filename)
+                        parser = CodeParser(filename=full_path)
+                        statements, _ = parser.parse_source()
+                        files.append(("/" + filename, len(statements)))
         result['dirs'] = sorted(dirs)
         result['files'] = sorted(files)
 
@@ -63,7 +66,9 @@ class FileHandler:
             else:
                 if not tmp.startswith('.') and tmp.endswith('.py'):
                     # ignore .gitignore, *.pyc
-                    ret.append(tmp.replace(self.path, ''))
+                    parser = CodeParser(filename=tmp)
+                    statements, _ = parser.parse_source()
+                    ret.append((tmp.replace(self.path, ''), len(statements)))
         return ret
 
     def get_source(self, filename):
