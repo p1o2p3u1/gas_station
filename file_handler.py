@@ -1,6 +1,8 @@
 import os
 from config_handler import ConfigHandler
 from coverage.parser import CodeParser
+import subprocess
+from unidiff_parser import UnidiffParser
 
 class FileHandler:
 
@@ -71,22 +73,74 @@ class FileHandler:
                     ret.append((tmp.replace(self.path, ''), len(statements)))
         return ret
 
-    def get_source(self, filename):
+    def get_source(self, filename, revision=None, repo='svn'):
         """
         get the source text of the file
-        :param filename: the name of the source file.
-        :return: e.g. {
-            'filename': 'a.py',
-            'text': "print 'hi'"
-            'revision': 1234
+        :param filename: the name of the source file
+        :param revision: the version of the file
+        :param repo: svn or git repo
+        :return: e.g.
+        {
+           'filename': 'filename1.py',
+           'URL': 'http://svn.netease.com/repo/filename1.py',
+           'Revision': '10',
+           'text': 'print "hello world"'
         }
         """
         result = {
             'filename': filename
         }
         location = self.path + '/' + filename
-        with open(location, 'r') as reader:
-            result['text'] = reader.read()
+
+        if repo == 'svn':
+            # if revision is not given, use svn info to get the current vision
+            if not revision:
+                p = subprocess.Popen(
+                    ['svn', 'info', location],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE)
+
+                out, err = p.communicate()
+                lines = out.split('\n')
+                for line in lines:
+                    if line.startswith('URL'):
+                        result['URL'] = line[line.index(':') + 1:].strip()
+                    elif line.startswith('Revision'):
+                        revision = line[line.index(':') + 1:].strip()
+                        result['Revision'] = revision
+            # get the source text for a specific version
+            p = subprocess.Popen(
+                ['svn', 'cat', location, '-r', revision],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE)
+
+            out, err = p.communicate()
+            result['text'] = out
+        else:
+            # git? next time baby
+            pass
+        return result
+
+    def show_diff(self, filename, old_version, cur_version, repo='svn'):
+        result = {
+            'filename': filename
+        }
+        location = self.path + '/' + filename
+        if repo == 'svn':
+            # get svn diff info with command 'svn diff -r v1:v2 filepath'
+            p = subprocess.Popen(
+                ['svn', 'diff', '-r', old_version+':'+cur_version, location],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE)
+
+            out, err = p.communicate()
+            # the output is unidiff format
+            parser = UnidiffParser()
+            modified = parser.parse(out)
+            result['update'] = modified
+        else:
+            # git?
+            pass
         return result
 
 if __name__ == '__main__':
