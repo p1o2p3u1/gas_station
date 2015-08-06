@@ -123,7 +123,8 @@ class FileHandler:
 
     def show_diff(self, filename, old_version, cur_version, repo='svn'):
         result = {
-            'filename': filename
+            'filename': filename,
+            'update': []
         }
         location = self.path + '/' + filename
         if repo == 'svn':
