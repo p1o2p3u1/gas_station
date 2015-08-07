@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, request, current_app
 from functools import wraps
-from file_handler import FileHandler
+from app.file_handler import FileHandler
 
 app = Flask(__name__)
 

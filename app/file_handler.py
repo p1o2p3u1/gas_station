@@ -1,8 +1,11 @@
 import os
-from config_handler import ConfigHandler
-from coverage.parser import CodeParser
 import subprocess
-from unidiff_parser import UnidiffParser
+
+from coverage.parser import CodeParser
+
+from app.config_handler import ConfigHandler
+from app.unidiff_parser import UnidiffParser
+
 
 class FileHandler:
 
