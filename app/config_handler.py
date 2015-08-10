@@ -5,7 +5,6 @@ class ConfigHandler:
     def __init__(self):
         config = ConfigParser.RawConfigParser(allow_no_value=True)
         config.read('app.config')
-        print config
         self.path = config.get('svn', 'source_location').replace('\\', '/')
         self.db_user = config.get('mysql', 'username')
         self.db_pass = config.get('mysql', 'passwd')

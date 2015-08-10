@@ -1,21 +1,9 @@
-from flask import Flask, jsonify, request, current_app
-from functools import wraps
+from flask import Flask, jsonify, request
 from app.file_handler import FileHandler
+from app.wraps.jsonp_wrapper import jsonp
+from app.wraps.db_wrapper import request_db_connect
 
 app = Flask(__name__)
-
-def jsonp(func):
-    @wraps(func)
-    def decorated_function(*args, **kwargs):
-        callback = request.args.get('callback', False)
-        if callback:
-            data = str(func(*args, **kwargs).data)
-            content = str(callback) + '(' + data + ')'
-            mimetype = 'application/javascript'
-            return current_app.response_class(content, mimetype=mimetype)
-        else:
-            return func(*args, **kwargs)
-    return decorated_function
 
 @app.route('/')
 def hello():
@@ -23,6 +11,7 @@ def hello():
 
 @app.route('/file')
 @jsonp
+@request_db_connect
 def get_source():
     filename = request.args.get('path', False)
     version = request.args.get('v', None)
@@ -35,6 +24,7 @@ def get_source():
 
 @app.route('/diff')
 @jsonp
+@request_db_connect
 def show_diff():
     filename = request.args.get('path', None)
     old_version = request.args.get('old', None)
@@ -48,6 +38,7 @@ def show_diff():
 
 @app.route('/list')
 @jsonp
+@request_db_connect
 def list_dir():
     f = FileHandler()
     return jsonify(f.list_all_files())
