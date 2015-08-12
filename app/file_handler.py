@@ -108,7 +108,7 @@ class FileHandler:
                 for line in lines:
                     if line.startswith('URL'):
                         result['URL'] = line[line.index(':') + 1:].strip()
-                    elif line.startswith('Revision'):
+                    elif line.startswith('Last Changed Rev'):
                         revision = line[line.index(':') + 1:].strip()
                         result['Revision'] = revision
             # get the source text for a specific version
