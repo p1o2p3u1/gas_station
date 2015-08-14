@@ -57,6 +57,7 @@ create table if not exists report (
     miss text,
     cov_result float,
     diff text,
+    diff_version int,
     diff_result float,
     primary key (id),
     index (job_id)

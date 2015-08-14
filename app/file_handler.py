@@ -2,10 +2,9 @@ import os
 import subprocess
 
 from coverage.parser import CodeParser
-
 from app.config_handler import ConfigHandler
 from app.unidiff_parser import UnidiffParser
-
+from app.dbs import file_db
 
 class FileHandler:
 
@@ -26,6 +25,9 @@ class FileHandler:
             'dir3': []
         }
         """
+        cache = file_db.query_dirs(self.path)
+        if cache:
+            return cache
         result = {
             'path': self.path,
             'dirs': [],
@@ -51,7 +53,7 @@ class FileHandler:
         for dirname in result['dirs']:
             full_path = self.path + '/' + dirname
             result[dirname] = self._dfs(full_path)
-
+        file_db.save_dirs(self.path, result)
         return result
 
     def _dfs(self, filename):
@@ -111,14 +113,23 @@ class FileHandler:
                     elif line.startswith('Last Changed Rev'):
                         revision = line[line.index(':') + 1:].strip()
                         result['Revision'] = revision
-            # get the source text for a specific version
-            p = subprocess.Popen(
-                ['svn', 'cat', location, '-r', revision],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE)
 
-            out, err = p.communicate()
-            result['text'] = out
+            cache = file_db.query_file(filename, revision)
+            if cache is not None:
+                result['text'] = cache
+            else:
+                # get the source text for a specific version
+                p = subprocess.Popen(
+                    ['svn', 'cat', location, '-r', revision],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE)
+
+                out, err = p.communicate()
+                if len(err) > 0:
+                    result['text'] = err
+                else:
+                    result['text'] = out
+                    file_db.save_file(filename, revision, out)
         else:
             # git? next time baby
             pass
@@ -131,17 +142,22 @@ class FileHandler:
         }
         location = self.path + '/' + filename
         if repo == 'svn':
-            # get svn diff info with command 'svn diff -r v1:v2 filepath'
-            p = subprocess.Popen(
-                ['svn', 'diff', '-r', old_version+':'+cur_version, location],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE)
+            cache = file_db.query_diff(filename, old_version, cur_version)
+            if cache:
+                result['update'] = cache
+            else:
+                # get svn diff info with command 'svn diff -r v1:v2 filepath'
+                p = subprocess.Popen(
+                    ['svn', 'diff', '-r', old_version+':'+cur_version, location],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE)
 
-            out, err = p.communicate()
-            # the output is unidiff format
-            parser = UnidiffParser()
-            modified = parser.parse(out)
-            result['update'] = modified
+                out, err = p.communicate()
+                # the output is unidiff format
+                parser = UnidiffParser()
+                modified = parser.parse(out)
+                result['update'] = modified
+                file_db.save_diff(filename, old_version, cur_version, modified)
         else:
             # git?
             pass

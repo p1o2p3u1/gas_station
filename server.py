@@ -11,6 +11,7 @@ def hello():
 
 @app.route('/file')
 @jsonp
+@request_db_connect
 def get_source():
     filename = request.args.get('path', False)
     version = request.args.get('v', None)
@@ -23,6 +24,7 @@ def get_source():
 
 @app.route('/diff')
 @jsonp
+@request_db_connect
 def show_diff():
     filename = request.args.get('path', None)
     old_version = request.args.get('old', None)
@@ -36,6 +38,7 @@ def show_diff():
 
 @app.route('/list')
 @jsonp
+@request_db_connect
 def list_dir():
     f = FileHandler()
     return jsonify(f.list_all_files())
