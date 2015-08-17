@@ -71,7 +71,8 @@ def query_diff(filename, pre_v, cur_v):
     if len(rows) == 0:
         return None
     else:
-        return rows[0]['diff'].split(',')
+        diff = rows[0]['diff']
+        return [int(x) for x in diff.split(',')]
 
 def save_diff(filename, pre_v, cur_v, diff):
     sql = "insert into diff (filename, pre_version, cur_version, diff) values (%s, %s, %s, %s)"

