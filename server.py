@@ -45,5 +45,17 @@ def list_dir():
     f = FileHandler()
     return jsonify(f.list_all_files())
 
+@app.route('/log')
+@jsonp
+def svn_log():
+    filename = request.args.get('file', None)
+    limit = request.args.get('num', 10)
+    if filename is None:
+        return "invalid parameter"
+    else:
+        f = FileHandler()
+        return jsonify(f.show_log(filename, limit))
+
+
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5000, debug=True)

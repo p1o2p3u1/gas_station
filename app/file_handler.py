@@ -3,7 +3,7 @@ import subprocess
 
 from coverage.parser import CodeParser
 from app.config_handler import ConfigHandler
-from app.unidiff_parser import UnidiffParser
+import app.parser as parser
 from app.dbs import file_db
 
 class FileHandler:
@@ -153,15 +153,47 @@ class FileHandler:
                     stderr=subprocess.PIPE)
 
                 out, err = p.communicate()
-                # the output is unidiff format
-                parser = UnidiffParser()
-                modified = parser.parse(out)
-                result['update'] = modified
-                file_db.save_diff(filename, old_version, cur_version, modified)
+                if len(err) > 0:
+                    result['error'] = err
+                else:
+                    # the output is unidiff format
+                    modified = parser.parse_unidiff(out)
+                    result['update'] = modified
+                    file_db.save_diff(filename, old_version, cur_version, modified)
         else:
             # git?
             pass
         return result
+
+    def show_log(self, filename, limit, repo='svn'):
+        """
+        list svn logs with command 'svn log filename -l limit'
+        :param filename: the name of the file
+        :param limit: how many logs should display
+        :return:
+        """
+        result = {
+            'filename': filename,
+            'limit': limit
+        }
+        location = self.path + '/' + filename
+        if repo == 'svn':
+            p = subprocess.Popen(
+                ['svn', 'log', location, '-l', limit, '--xml'],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE
+            )
+            out, err = p.communicate()
+            if len(err) > 0:
+                result['error'] = err
+            else:
+                logs = parser.parse_svn_log(out)
+                result['logs'] = logs
+        else:
+            # git?
+            pass
+        return result
+
 
 if __name__ == '__main__':
     f = FileHandler()
