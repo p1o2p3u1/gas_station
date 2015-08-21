@@ -2,7 +2,7 @@ from flask import Flask, jsonify, request
 from app.file_handler import FileHandler
 from app.wraps.jsonp_wrapper import jsonp
 from app.wraps.db_wrapper import request_db_connect
-import subprocess
+from app.wraps.auth_wrapper import check_request
 
 
 app = Flask(__name__)
@@ -12,6 +12,7 @@ def hello():
     return "Hello World"
 
 @app.route('/file')
+@check_request
 @jsonp
 @request_db_connect
 def get_source():
@@ -25,6 +26,7 @@ def get_source():
         return "need parameter path"
 
 @app.route('/diff')
+@check_request
 @jsonp
 @request_db_connect
 def show_diff():
@@ -39,6 +41,7 @@ def show_diff():
         return "what do you want.."
 
 @app.route('/list')
+@check_request
 @jsonp
 @request_db_connect
 def list_dir():
@@ -46,6 +49,7 @@ def list_dir():
     return jsonify(f.list_all_files())
 
 @app.route('/log')
+@check_request
 @jsonp
 def svn_log():
     filename = request.args.get('file', None)

@@ -1,20 +1,21 @@
 import ConfigParser
 
-class ConfigHandler:
 
-    def __init__(self):
-        config = ConfigParser.RawConfigParser(allow_no_value=True)
-        config.read('app.config')
-        self.path = config.get('svn', 'source_location').replace('\\', '/')
-        self.db_user = config.get('mysql', 'username')
-        self.db_pass = config.get('mysql', 'passwd')
-        self.db_name = config.get('mysql', 'dbname')
-        self.db_host = config.get('mysql', 'host')
-        self.db_port = config.get('mysql', 'port')
-        self.db_charset = config.get('mysql', 'charset')
+config = ConfigParser.RawConfigParser(allow_no_value=True)
+config.read('app.config')
 
-if __name__ == '__main__':
-    c = ConfigHandler()
-    print c.path
+#  [svn]
+path = config.get('svn', 'source_location').replace('\\', '/')
+
+#  [mysql]
+db_user = config.get('mysql', 'username')
+db_pass = config.get('mysql', 'passwd')
+db_name = config.get('mysql', 'dbname')
+db_host = config.get('mysql', 'host')
+db_port = config.get('mysql', 'port')
+db_charset = config.get('mysql', 'charset')
+
+# [users]
+users = config.get('users', 'users').split(',')
 
 

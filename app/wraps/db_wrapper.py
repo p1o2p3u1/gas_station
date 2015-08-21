@@ -1,13 +1,12 @@
 from functools import wraps
 from flask import g
 import MySQLdb
-from app.config_handler import ConfigHandler
-
-f = ConfigHandler()
+import app.config_handler as configs
 
 
 def _connect_db():
-    conn = MySQLdb.connect(host=f.db_host, user=f.db_user, passwd=f.db_pass, db=f.db_name, charset=f.db_charset)
+    conn = MySQLdb.connect(host=configs.db_host, user=configs.db_user, passwd=configs.db_pass, db=configs.db_name,
+                           charset=configs.db_charset)
     cursor = conn.cursor(cursorclass=MySQLdb.cursors.DictCursor)
     return conn, cursor
 

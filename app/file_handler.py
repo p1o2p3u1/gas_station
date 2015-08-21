@@ -2,15 +2,14 @@ import os
 import subprocess
 
 from coverage.parser import CodeParser
-from app.config_handler import ConfigHandler
+import app.config_handler as configs
 import app.parser as parser
 from app.dbs import file_db
 
 class FileHandler:
 
     def __init__(self):
-        self.config = ConfigHandler()
-        self.path = self.config.path
+        self.path = configs.path
 
     def list_all_files(self):
         """
