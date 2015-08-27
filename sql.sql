@@ -16,11 +16,13 @@ create table if not exists diff (
 drop table if exists file;
 create table if not exists file (
     id bigint not null auto_increment,
+    server varchar(100) not null,
+    path varchar(255) not null,
     filename varchar(255) not null,
     version int not null,
     source longtext,
     primary key (id),
-    unique key (filename, version)
+    unique key (server, path, filename, version)
 )ENGINE=InnoDB  DEFAULT CHARSET=utf8 ;
 
 drop table if exists dirs;

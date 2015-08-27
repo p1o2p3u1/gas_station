@@ -113,7 +113,7 @@ class FileHandler:
                         revision = line[line.index(':') + 1:].strip()
                         result['Revision'] = revision
 
-            cache = file_db.query_file(filename, revision)
+            cache = file_db.query_file(self.path, filename, revision)
             if cache is not None:
                 result['text'] = cache
             else:
@@ -128,7 +128,7 @@ class FileHandler:
                     result['text'] = err
                 else:
                     result['text'] = out
-                    file_db.save_file(filename, revision, out)
+                    file_db.save_file(self.path, filename, revision, out)
         else:
             # git? next time baby
             pass

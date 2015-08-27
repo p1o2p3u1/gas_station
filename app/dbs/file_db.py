@@ -27,8 +27,9 @@ def query_dirs(path):
     :return:
     """
     version = cur_repo_revision(path)
-    sql = "select dirs from dirs where path='%s' and server='%s' and version='%s'" % (path, server, version)
-    g.cursor.execute(sql)
+    sql = "select dirs from dirs where path=%s and server=%s and version=%s"
+    data = (path, server, version)
+    g.cursor.execute(sql, data)
     rows = g.cursor.fetchall()
     if len(rows) == 0:
         return None
@@ -45,9 +46,10 @@ def save_dirs(path, result):
     return g.cursor.lastrowid
 
 
-def query_file(filename, revision):
-    sql = "select source from file where filename = '%s' and version = '%s'" % (filename, revision)
-    g.cursor.execute(sql)
+def query_file(path, filename, revision):
+    sql = "select source from file where server=%s and path=%s and filename=%s and version=%s"
+    data = (server, path, filename, revision)
+    g.cursor.execute(sql, data)
     rows = g.cursor.fetchall()
     if len(rows) == 0:
         return None
@@ -55,18 +57,18 @@ def query_file(filename, revision):
         return rows[0]['source']
 
 
-def save_file(filename, revision, source):
-    sql = "insert into file (filename, version, source) values (%s, %s, %s)"
-    data = (filename, revision, source)
+def save_file(path, filename, revision, source):
+    sql = "insert into file (server, path, filename, version, source) values (%s, %s, %s, %s, %s)"
+    data = (server, path, filename, revision, source)
     g.cursor.execute(sql, data)
     g.conn.commit()
     return g.cursor.lastrowid
 
 
 def query_diff(filename, pre_v, cur_v):
-    sql = "select diff from diff where filename = '%s' and pre_version = '%s' and cur_version = '%s'" \
-          % (filename, pre_v, cur_v)
-    g.cursor.execute(sql)
+    sql = "select diff from diff where filename=%s and pre_version=%s and cur_version=%s"
+    data = (filename, pre_v, cur_v)
+    g.cursor.execute(sql, data)
     rows = g.cursor.fetchall()
     if len(rows) == 0:
         return None
