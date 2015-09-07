@@ -8,7 +8,7 @@ server = socket.getfqdn()
 
 def cur_repo_revision(path):
     p = subprocess.Popen(
-        ['cat', 'info', path],
+        ['svn', 'info', path],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE)
 
